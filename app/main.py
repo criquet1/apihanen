@@ -6,8 +6,6 @@ from .routers import user, categorie, clientele, marque, produit, taille, unite_
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 
-# print(settings.database_name)
-
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -32,4 +30,4 @@ app.include_router(produit.router)
 
 @app.get("/")
 async def root():
-  return {"message": "Welcome !"}
+  return {"message": "Welcome ! This is Hanen's API"}
