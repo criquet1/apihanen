@@ -1,24 +1,39 @@
 from pydantic import BaseModel, EmailStr
-from datetime import date
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, EmailStr
 from pydantic.types import conint
 from typing import Optional, List
 
 
-class UserBase(BaseModel):
-  user_email: EmailStr
-  user_password: str
+class UserCreate(BaseModel):
+  email: EmailStr
+  password: str
 
-class UserCreate(UserBase):
-  pass
 
-class User(BaseModel):
-  user_id: int
-  user_email: EmailStr
+class UserOut(BaseModel):
+  id: int
+  email: EmailStr
+  created_at: datetime
 
   class Config:
     orm_mode = True
+
+
+
+class UserLogin(BaseModel):
+   email: EmailStr
+   password: str
+
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
 
 
 class Categorie(BaseModel):
@@ -133,3 +148,4 @@ class Produit_create(BaseModel):
 
   class Config:
       orm_mode = True
+

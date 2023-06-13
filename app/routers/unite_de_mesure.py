@@ -1,5 +1,5 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends, APIRouter
-from .. import models, schemas, utils
+from .. import models, schemas, oauth2
 from ..database import get_db
 from typing import List
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ def get_unite_de_mesure(id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED,  response_model=schemas.Unite_de_mesure)
-def create_unite_de_mesure(unite_de_mesure: schemas.Unite_de_mesure_create, db: Session = Depends(get_db)):
+def create_unite_de_mesure(unite_de_mesure: schemas.Unite_de_mesure_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   new_unite_de_mesure = models.Unite_de_mesure(**unite_de_mesure.dict())
   db.add(new_unite_de_mesure)
@@ -46,7 +46,7 @@ def create_unite_de_mesure(unite_de_mesure: schemas.Unite_de_mesure_create, db: 
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_unite_de_mesure(id:int, db: Session = Depends(get_db)):
+def delete_unite_de_mesure(id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
   unite_de_mesure = db.query(models.Unite_de_mesure).filter(models.Unite_de_mesure.id == id)
 
   if unite_de_mesure.first() == None:
@@ -61,7 +61,7 @@ def delete_unite_de_mesure(id:int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schemas.Unite_de_mesure)
-def update_unite_de_mesure(id: int, updated_unite_de_mesure: schemas.Unite_de_mesure_create, db: Session = Depends(get_db)):
+def update_unite_de_mesure(id: int, updated_unite_de_mesure: schemas.Unite_de_mesure_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   unite_de_mesure_query = db.query(models.Unite_de_mesure).filter(models.Unite_de_mesure.id == id)
   unite_de_mesure = unite_de_mesure_query.first()

@@ -1,9 +1,16 @@
-from sqlalchemy import Date, Column, Integer, String, Boolean, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from .database import Base
 from sqlalchemy.orm import relationship, backref
 
+
+class User(Base):
+  __tablename__ = "users"
+  id = Column(Integer, primary_key=True, nullable=False)
+  email = Column(String(40), nullable=False, unique=True)
+  password = Column(String(256), nullable=False)
+  created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 class Categorie(Base):
   __tablename__ = "categories"

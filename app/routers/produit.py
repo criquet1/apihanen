@@ -1,5 +1,5 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends, APIRouter
-from .. import models, schemas, utils
+from .. import models, schemas, oauth2
 from ..database import get_db
 from typing import List
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ def get_produit(id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED,  response_model=schemas.Produit)
-def create_produit(produit: schemas.Produit_create, db: Session = Depends(get_db)):
+def create_produit(produit: schemas.Produit_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   new_produit = models.Produit(**produit.dict())
   db.add(new_produit)
@@ -46,7 +46,7 @@ def create_produit(produit: schemas.Produit_create, db: Session = Depends(get_db
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_produit(id:int, db: Session = Depends(get_db)):
+def delete_produit(id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
   produit = db.query(models.Produit).filter(models.Produit.id == id)
 
   if produit.first() == None:
@@ -61,7 +61,7 @@ def delete_produit(id:int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schemas.Produit)
-def update_produit(id: int, updated_produit: schemas.Produit_create, db: Session = Depends(get_db)):
+def update_produit(id: int, updated_produit: schemas.Produit_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   produit_query = db.query(models.Produit).filter(models.Produit.id == id)
   produit = produit_query.first()

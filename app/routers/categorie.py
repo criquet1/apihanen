@@ -1,5 +1,5 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends, APIRouter
-from .. import models, schemas, utils
+from .. import models, schemas, oauth2
 from ..database import get_db
 from typing import List
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ def get_categorie(id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED,  response_model=schemas.Categorie)
-def create_categorie(categorie: schemas.Categorie_create, db: Session = Depends(get_db)):
+def create_categorie(categorie: schemas.Categorie_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   new_categorie = models.Categorie(**categorie.dict())
   db.add(new_categorie)
@@ -46,7 +46,7 @@ def create_categorie(categorie: schemas.Categorie_create, db: Session = Depends(
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_categorie(id:int, db: Session = Depends(get_db)):
+def delete_categorie(id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
   categorie = db.query(models.Categorie).filter(models.Categorie.id == id)
 
   if categorie.first() == None:
@@ -61,7 +61,7 @@ def delete_categorie(id:int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schemas.Categorie)
-def update_categorie(id: int, updated_categorie: schemas.Categorie_create, db: Session = Depends(get_db)):
+def update_categorie(id: int, updated_categorie: schemas.Categorie_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   categorie_query = db.query(models.Categorie).filter(models.Categorie.id == id)
   categorie = categorie_query.first()

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends, APIRouter
-from .. import models, schemas, utils
+from .. import models, schemas, oauth2, utils
 from ..database import get_db
 from typing import List
 from sqlalchemy.orm import Session
@@ -10,20 +10,17 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[schemas.User])
-def get_users(db: Session = Depends(get_db)):
+@router.get("/", response_model=List[schemas.UserOut])
+def get_users(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
   users = db.query(models.User).all()
   return users 
 
 
+@router.post("/", status_code=status.HTTP_201_CREATED,  response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-
-@router.post("/", status_code=status.HTTP_201_CREATED,  response_model=schemas.User)
-def create_users(user: schemas.UserCreate, db: Session = Depends(get_db)):
-
-  hashed_password = utils.hash(user.user_password)
-  # hashed_password = bcrypt.hash(user.user_password)
-  user.user_password = hashed_password
+  hashed_password = utils.hash(user.password)
+  user.password = hashed_password
 
   new_user = models.User(**user.dict())
   db.add(new_user)
@@ -33,10 +30,10 @@ def create_users(user: schemas.UserCreate, db: Session = Depends(get_db)):
   return new_user
 
 
-@router.get("/{id}", response_model=schemas.User)
-def get_user(id: int, db: Session = Depends(get_db)):
+@router.get("/{id}", response_model=schemas.UserOut)
+def get_user(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-  user = db.query(models.User).filter(models.User.user_id == id).first()
+  user = db.query(models.User).filter(models.User.id == id).first()
 
   if not user:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"user with id: {id} was not found")
@@ -44,8 +41,8 @@ def get_user(id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(id:int, db: Session = Depends(get_db)):
-  user = db.query(models.User).filter(models.User.user_id == id)
+def delete_user(id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+  user = db.query(models.User).filter(models.User.id == id).first()
 
   if user.first() == None:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"user with id: {id} does not exist")
@@ -56,17 +53,17 @@ def delete_user(id:int, db: Session = Depends(get_db)):
   return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/{id}", response_model=schemas.User)
-def update_user(id: int, updated_user: schemas.UserCreate, db: Session = Depends(get_db)):
+@router.put("/{id}", response_model=schemas.UserOut)
+def update_user(id: int, updated_user: schemas.UserCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-  user_query = db.query(models.User).filter(models.User.user_id == id)
+  user_query = db.query(models.User).filter(models.User.id == id)
   user = user_query.first()
 
   if user == None:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"user with id: {id} does not exist")
   
-  hashed_password = utils.hash(user.user_password)
-  user.user_password = hashed_password
+  hashed_password = utils.hash(user.password)
+  user.password = hashed_password
 
   user_query.update(updated_user.dict(), synchronize_session=False)
 

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends, APIRouter
-from .. import models, schemas, utils
+from .. import models, schemas, oauth2
 from ..database import get_db
 from typing import List
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ def get_clientele(id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED,  response_model=schemas.Clientele)
-def create_clientele(clientele: schemas.Clientele_create, db: Session = Depends(get_db)):
+def create_clientele(clientele: schemas.Clientele_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   new_clientele = models.Clientele(**clientele.dict())
   db.add(new_clientele)
@@ -46,7 +46,7 @@ def create_clientele(clientele: schemas.Clientele_create, db: Session = Depends(
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_clientele(id:int, db: Session = Depends(get_db)):
+def delete_clientele(id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
   clientele = db.query(models.Clientele).filter(models.Clientele.id == id)
 
   if clientele.first() == None:
@@ -61,7 +61,7 @@ def delete_clientele(id:int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schemas.Clientele)
-def update_clientele(id: int, updated_clientele: schemas.Clientele_create, db: Session = Depends(get_db)):
+def update_clientele(id: int, updated_clientele: schemas.Clientele_create, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
   clientele_query = db.query(models.Clientele).filter(models.Clientele.id == id)
   clientele = clientele_query.first()
