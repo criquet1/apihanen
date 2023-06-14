@@ -8,7 +8,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-origins = ["*"]
+origins = ["https://boutiquehanen.onrender.com"]
 
 app.add_middleware(
     CORSMiddleware,
