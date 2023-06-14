@@ -10,7 +10,15 @@ class User(Base):
   id = Column(Integer, primary_key=True, nullable=False)
   email = Column(String(40), nullable=False, unique=True)
   password = Column(String(256), nullable=False)
+  fonction = Column(Integer, ForeignKey("fonctions.id", ondelete="CASCADE"), nullable=False)
   created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+
+class Fonction(Base):
+  __tablename__ = "fonctions"
+  id = Column(Integer, primary_key=True, nullable=False)
+  nom = Column(String(15), nullable=False)
+
 
 class Categorie(Base):
   __tablename__ = "categories"

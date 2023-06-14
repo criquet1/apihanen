@@ -9,6 +9,7 @@ from typing import Optional, List
 class UserCreate(BaseModel):
   email: EmailStr
   password: str
+  fonction: str
 
 
 class UserOut(BaseModel):
@@ -30,6 +31,7 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    fonction: int
 
 
 class TokenData(BaseModel):
